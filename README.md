@@ -81,6 +81,17 @@ uvicorn app.main:app --reload --port 8001
 
 ---
 
+1. **Download model:**
+
+```
+Model is not included due to size. Download separately.
+Model is available on Hugging Face:
+https://huggingface.co/Sanjarbek1024/tinyllama-medquad-gguf
+```
+
+
+---
+
 ## Test the API
 
 Open in browser:
