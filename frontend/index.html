@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MedLlama — AI Medical Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #3B82F6;
+      --primary-light: #EFF6FF;
+      --primary-mid:   #BFDBFE;
+      --accent:        #06B6D4;
+      --accent-light:  #ECFEFF;
+      --success:       #10B981;
+      --bg:            #F8FAFF;
+      --surface:       #FFFFFF;
+      --border:        #E2E8F5;
+      --text:          #1E293B;
+      --text-muted:    #64748B;
+      --text-light:    #94A3B8;
+      --shadow-sm:     0 1px 3px rgba(59,130,246,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:     0 4px 20px rgba(59,130,246,0.12), 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-lg:     0 20px 60px rgba(59,130,246,0.15), 0 8px 24px rgba(0,0,0,0.08);
+      --radius:        16px;
+      --radius-sm:     10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background decoration ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(59,130,246,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(6,182,212,0.07) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(248,250,255,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .nav-title {
+      font-family: 'Lora', serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
+    .nav-title span { color: var(--primary); }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-nav {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+    }
+
+    .btn-nav {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-nav:hover { background: #2563EB; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 100px 24px 80px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-mid);
+      color: var(--primary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+      letter-spacing: 0.03em;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-badge::before { content: '⚕️'; font-size: 0.9em; }
+
+    .hero-title {
+      font-family: 'Lora', serif;
+      font-size: clamp(2.4rem, 5vw, 3.6rem);
+      font-weight: 700;
+      line-height: 1.18;
+      color: var(--text);
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+
+    .hero-title .highlight {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+      animation: fadeUp 0.6s ease 0.2s both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s ease 0.3s both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--primary), #2563EB);
+      color: #fff;
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.35);
+      transition: all 0.25s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(59,130,246,0.45);
+    }
+    .btn-primary svg { width: 18px; height: 18px; }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      transition: all 0.25s;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-ghost:hover { border-color: var(--primary-mid); background: var(--primary-light); transform: translateY(-1px); }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      padding: 0 24px 80px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s ease 0.4s both;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Lora', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* ── CARDS SECTION ── */
+    .section {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-family: 'Lora', serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 48px;
+    }
+
+    /* Spec cards */
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .spec-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s;
+      animation: fadeUp 0.6s ease both;
+    }
+    .spec-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-mid);
+    }
+
+    .spec-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .icon-blue   { background: var(--primary-light); }
+    .icon-cyan   { background: var(--accent-light);  }
+    .icon-green  { background: #ECFDF5; }
+    .icon-purple { background: #F5F3FF; }
+
+    .spec-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 6px;
+    }
+
+    .spec-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .spec-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Feature cards */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 48px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      transition: all 0.25s;
+    }
+    .feature-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary-mid); }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .feature-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .feature-desc {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+
+    .disclaimer-box {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .disclaimer-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+    .disclaimer-text {
+      font-size: 0.84rem;
+      color: #92400E;
+      line-height: 1.6;
+    }
+
+    .disclaimer-text strong { font-weight: 600; }
+
+    /* ── CTA ── */
+    .cta-section {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 0 24px 100px;
+    }
+
+    .cta-box {
+      max-width: 680px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #EFF6FF, #ECFEFF);
+      border: 1px solid var(--primary-mid);
+      border-radius: 24px;
+      padding: 60px 40px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .cta-box h2 {
+      font-family: 'Lora', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .cta-box p {
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      font-size: 1rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 28px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .footer-logo {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .footer-name {
+      font-family: 'Lora', serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .footer-right {
+      font-size: 0.78rem;
+      color: var(--text-light);
+    }
+
+    .footer-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .footer-tag {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 6px;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .spec-card:nth-child(1) { animation-delay: 0.1s; }
+    .spec-card:nth-child(2) { animation-delay: 0.2s; }
+    .spec-card:nth-child(3) { animation-delay: 0.3s; }
+    .spec-card:nth-child(4) { animation-delay: 0.4s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 20px; }
+      .hero { padding: 60px 20px 60px; }
+      .section { padding: 0 20px 60px; }
+      .stats-strip { gap: 28px; }
+      footer { padding: 24px 20px; flex-direction: column; align-items: center; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-brand" href="index.html">
+      <div class="nav-logo">🩺</div>
+      <span class="nav-title">Med<span>Llama</span></span>
+    </a>
+    <div class="nav-actions">
+      <span class="badge-nav">QLoRA Fine-tuned</span>
+      <a class="btn-nav" href="chat.html">Start Chat →</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">Medical AI Assistant</div>
+    <h1 class="hero-title">
+      Your AI-powered<br/>
+      <span class="highlight">Medical Question</span> Assistant
+    </h1>
+    <p class="hero-subtitle">
+      Ask medical questions in plain language and get clear, informative answers.
+      Powered by a fine-tuned TinyLlama model trained on real medical Q&amp;A data.
+    </p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="chat.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Start Chatting
+      </a>
+      <a class="btn-ghost" href="#specs">
+        View Model Details
+      </a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="stat">
+      <span class="stat-value">2,000</span>
+      <span class="stat-label">Training Samples</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">1.1B</span>
+      <span class="stat-label">Model Parameters</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">QLoRA</span>
+      <span class="stat-label">Fine-tune Method</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">MedQuAD</span>
+      <span class="stat-label">Dataset</span>
+    </div>
+  </div>
+
+  <!-- SPECS SECTION -->
+  <section class="section" id="specs">
+    <p class="section-label">Technical Details</p>
+    <h2 class="section-title">Model Specifications</h2>
+    <div class="spec-grid">
+
+      <div class="spec-card">
+        <div class="spec-icon icon-blue">🤖</div>
+        <div class="spec-label">Base Model</div>
+        <div class="spec-value">TinyLlama 1.1B Chat v1.0</div>
+        <div class="spec-desc">
+          TinyLlama/TinyLlama-1.1B-Chat-v1.0 — a compact but capable
+          language model with 1.1 billion parameters, optimized for
+          chat-style conversations.
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-icon icon-cyan">🧬</div>
+        <div class="spec-label">Training Dataset</div>
+        <div class="spec-value">MedQuAD</div>
+        <div class="spec-desc">
+          Medical Question Answering Dataset — a curated collection of
+          real medical Q&amp;A pairs from trusted health sources like NIH,
+          CDC, and MedlinePlus.
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-icon icon-green">⚡</div>
+        <div class="spec-label">Fine-tuning Method</div>
+        <div class="spec-value">QLoRA (4-bit Quantization)</div>
+        <div class="spec-desc">
+          Quantized Low-Rank Adaptation — an efficient fine-tuning
+          technique that reduces memory usage by 4× while preserving
+          model quality. Ideal for training on limited hardware.
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-icon icon-purple">📊</div>
+        <div class="spec-label">Training Size</div>
+        <div class="spec-value">2,000 Q&amp;A Pairs</div>
+        <div class="spec-desc">
+          The model was fine-tuned on 2,000 medical question-answer
+          pairs, teaching it to respond accurately to health-related
+          queries in a conversational format.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FEATURES -->
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <div>
+          <div class="feature-title">Natural Conversations</div>
+          <div class="feature-desc">Ask medical questions in everyday language — no medical jargon required. The model understands context and gives clear answers.</div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🕘</div>
+        <div>
+          <div class="feature-title">Chat History</div>
+          <div class="feature-desc">All your previous conversations are saved locally. Switch between chats, start new ones, and review past answers anytime.</div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <div>
+          <div class="feature-title">Local & Private</div>
+          <div class="feature-desc">Your conversations stay on your device. Nothing is sent to external servers — complete privacy for your health questions.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    <div class="disclaimer-box">
+      <span class="disclaimer-icon">⚠️</span>
+      <div class="disclaimer-text">
+        <strong>Medical Disclaimer:</strong> MedLlama is an AI research project and is
+        <strong>not a substitute</strong> for professional medical advice, diagnosis, or treatment.
+        Always consult a qualified healthcare provider for medical decisions.
+        This tool is intended for informational and educational purposes only.
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-box">
+      <h2>Ready to ask your first question?</h2>
+      <p>Start a conversation with MedLlama and get clear, AI-powered answers to your medical questions.</p>
+      <a class="btn-primary" href="chat.html" style="font-size:1rem; padding:16px 40px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Open MedLlama Chat
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <a class="footer-brand" href="index.html">
+      <div class="footer-logo">🩺</div>
+      <span class="footer-name">MedLlama</span>
+    </a>
+    <div class="footer-tags">
+      <span class="footer-tag">TinyLlama-1.1B</span>
+      <span class="footer-tag">QLoRA</span>
+      <span class="footer-tag">MedQuAD</span>
+    </div>
+    <div class="footer-right">Built with ❤️ · AI Research Project</div>
+  </footer>
+
+</body>
+</html>
