@@ -50,7 +50,7 @@ backend/
 1. Clone the repository:
 
 ```
-git clone <your-repo-link>
+git clone https://github.com/Sanjarbek1024/medllama-chatbot
 cd MedLlama/backend
 ```
 
